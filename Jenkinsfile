@@ -1,50 +1,47 @@
+
 pipeline {
     agent any
 
-    tools {
-        // This must match the JDK name in your Jenkins Global Tool Configuration.
-        // Set this to the JDK 21 (or 17) installation you've configured.
-        jdk 'jdk21'
+    options {
+        timestamps()
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Checkout from SCM (works automatically with multibranch or Pipeline from SCM)
                 checkout scm
             }
         }
 
-        stage('Build') {
+        stage('Check Java') {
             steps {
-                // Use the Maven wrapper included in your project
-                sh './mvnw clean package -DskipTests=true'
+                bat 'java -version'
             }
         }
 
-        stage('Test') {
+        stage('Build and Test') {
             steps {
-                sh './mvnw test'
-            }
-            post {
-                always {
-                    // Publish JUnit test results
-                    junit 'target/surefire-reports/*.xml'
-                }
+                bat 'mvnw.cmd -B clean verify'
             }
         }
 
-        stage('Archive') {
+        stage('Archive JAR') {
             steps {
-                // Archive the built JAR for later use
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                archiveArtifacts(
+                    artifacts: 'target/*.jar',
+                    fingerprint: true
+                )
             }
         }
     }
 
     post {
+        success {
+            echo 'Spring Boot build and tests succeeded!'
+        }
+
         failure {
-            echo 'Build failed. Check the console output for details.'
+            echo 'Build failed. Check Console Output.'
         }
     }
 }
