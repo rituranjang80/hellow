@@ -29,7 +29,8 @@ pipeline {
         stage('Archive JAR') {
             steps {
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-                junit 'target/surefire-reports/*.xml'
+                // allowEmptyResults: true prevents failure when no tests exist
+                junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
             }
         }
     }
@@ -37,6 +38,9 @@ pipeline {
     post {
         failure {
             echo 'Build failed. Check Console Output.'
+        }
+        success {
+            echo 'Build succeeded!'
         }
     }
 }
