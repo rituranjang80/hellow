@@ -1,9 +1,9 @@
-
 pipeline {
     agent any
 
-    options {
-        timestamps()
+    tools {
+        // Must match the name in Manage Jenkins -> Global Tool Configuration
+        jdk 'jdk21'
     }
 
     stages {
@@ -13,7 +13,7 @@ pipeline {
             }
         }
 
-        stage('Check Java') {
+        stage('Verify Java') {
             steps {
                 bat 'java -version'
             }
@@ -21,25 +21,20 @@ pipeline {
 
         stage('Build and Test') {
             steps {
+                // Use the Maven wrapper (must exist in the repo)
                 bat 'mvnw.cmd -B clean verify'
             }
         }
 
         stage('Archive JAR') {
             steps {
-                archiveArtifacts(
-                    artifacts: 'target/*.jar',
-                    fingerprint: true
-                )
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                junit 'target/surefire-reports/*.xml'
             }
         }
     }
 
     post {
-        success {
-            echo 'Spring Boot build and tests succeeded!'
-        }
-
         failure {
             echo 'Build failed. Check Console Output.'
         }
