@@ -3,7 +3,7 @@ pipeline {
 
     tools {
         // Must match the name in Manage Jenkins -> Global Tool Configuration
-        jdk 'jdk'
+        jdk "jdk"
     }
 
     stages {
